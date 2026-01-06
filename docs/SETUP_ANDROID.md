@@ -18,12 +18,14 @@ sudo apt install openjdk-17-jdk -y
 ```
 
 Verify installation:
+
 ```bash
 java -version
 # Should show: openjdk version "17.x.x"
 ```
 
 Set JAVA_HOME (add to your `~/.bashrc` or `~/.zshrc`):
+
 ```bash
 echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
 echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bashrc
@@ -33,13 +35,16 @@ source ~/.bashrc
 ## Step 2: Install Android Studio
 
 ### Option A: Using Snap (Easiest)
+
 ```bash
 sudo snap install android-studio --classic
 ```
 
 ### Option B: Manual Installation
+
 1. Download Android Studio from: https://developer.android.com/studio
 2. Extract and run:
+
 ```bash
 cd ~/Downloads
 unzip android-studio-*.zip
@@ -77,11 +82,13 @@ export PATH=$PATH:$ANDROID_HOME/tools/bin
 ```
 
 Then reload:
+
 ```bash
 source ~/.bashrc
 ```
 
 **Note:** If Android Studio was installed via snap, the SDK location might be:
+
 ```bash
 export ANDROID_HOME=$HOME/snap/android-studio/current/Android/Sdk
 ```
@@ -112,6 +119,7 @@ npx react-native --version
 6. Click `Finish`
 
 Or via command line:
+
 ```bash
 $ANDROID_HOME/emulator/emulator -list-avds
 ```
@@ -125,16 +133,19 @@ npm install -g react-native-cli
 ## Step 8: Test Your Setup
 
 1. **Start Metro bundler:**
+
    ```bash
    npm start
    ```
 
 2. **In another terminal, run the app:**
+
    ```bash
    npm run android
    ```
 
    Or if you have an emulator running:
+
    ```bash
    npx react-native run-android
    ```
@@ -142,19 +153,23 @@ npm install -g react-native-cli
 ## Troubleshooting
 
 ### Issue: "ANDROID_HOME is not set"
+
 - Make sure you've added the export statements to `~/.bashrc`
 - Run `source ~/.bashrc` or restart your terminal
 
 ### Issue: "SDK location not found"
+
 - Check where Android Studio installed the SDK (usually `~/Android/Sdk`)
 - Update `ANDROID_HOME` in your `~/.bashrc`
 
 ### Issue: "Java version mismatch"
+
 - React Native 0.73 requires JDK 17
 - Verify with `java -version`
 - If wrong version, install JDK 17 and update `JAVA_HOME`
 
 ### Issue: "Emulator not starting"
+
 - Make sure KVM is enabled (for Linux):
   ```bash
   sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
@@ -163,16 +178,12 @@ npm install -g react-native-cli
 - Log out and log back in
 
 ### Issue: "Gradle build failed"
+
 - Make sure you have internet connection
 - Try: `cd android && ./gradlew clean`
-
-## Quick Setup Script
-
-Run the automated setup script (see `setup-android.sh` in project root).
 
 ## Additional Resources
 
 - [React Native Android Setup](https://reactnative.dev/docs/environment-setup)
 - [Android Studio Guide](https://developer.android.com/studio/intro)
 - [TMDB API Documentation](https://developer.themoviedb.org/docs)
-
