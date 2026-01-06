@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { tmdbApi } from "../services/tmdbApi";
 import { getImageUrl } from "../config/api";
-import MovieCard from "../components/MovieCard";
+import ItemCard from "../components/ItemCard";
 
 const { width, height } = Dimensions.get("window");
 
@@ -128,7 +128,7 @@ const MovieDetailsScreen = ({ route, navigation }) => {
                     });
                   }}
                 >
-                  <MovieCard movie={rec} onPress={() => {}} />
+                  <ItemCard item={rec} onPress={() => {}} layout="swimlane" />
                 </TouchableOpacity>
               ))}
             </ScrollView>

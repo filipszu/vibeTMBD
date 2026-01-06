@@ -8,7 +8,7 @@ import {
   Text,
 } from "react-native";
 import { tmdbApi } from "../services/tmdbApi";
-import MovieCard from "../components/MovieCard";
+import ItemCard from "../components/ItemCard";
 import Header from "../components/Header";
 
 const HomeScreen = ({ navigation }) => {
@@ -59,7 +59,11 @@ const HomeScreen = ({ navigation }) => {
         <FlatList
           data={data}
           renderItem={({ item }) => (
-            <MovieCard movie={item} onPress={() => handleMoviePress(item)} />
+            <ItemCard
+              item={item}
+              onPress={() => handleMoviePress(item)}
+              layout="swimlane"
+            />
           )}
           keyExtractor={(item) => item.id.toString()}
           horizontal

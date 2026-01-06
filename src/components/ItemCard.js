@@ -10,13 +10,20 @@ import {
 import { getImageUrl } from "../config/api";
 
 const { width } = Dimensions.get("window");
-const cardWidth = 140; // Fixed width for horizontal swimlanes
+const swimlaneCardWidth = 140; // Fixed width for horizontal swimlanes
+const gridCardWidth = (width - 48) / 2; // 2 columns with padding for grid
 
-const MovieCard = ({ movie, onPress }) => {
-  const posterUrl = getImageUrl(movie.poster_path, "poster", "medium");
+const ItemCard = ({ item, onPress, layout = "swimlane" }) => {
+  const posterUrl = getImageUrl(item.poster_path, "poster", "medium");
+  const cardWidth = layout === "grid" ? gridCardWidth : swimlaneCardWidth;
+  const cardStyles = [
+    styles.card,
+    { width: cardWidth },
+    layout === "grid" && styles.gridCard,
+  ];
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={cardStyles} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.imageContainer}>
         {posterUrl ? (
           <Image source={{ uri: posterUrl }} style={styles.poster} />
@@ -27,17 +34,17 @@ const MovieCard = ({ movie, onPress }) => {
         )}
         <View style={styles.ratingContainer}>
           <Text style={styles.rating}>
-            {movie.vote_average?.toFixed(1) || "N/A"}
+            {item.vote_average?.toFixed(1) || "N/A"}
           </Text>
         </View>
       </View>
       <View style={styles.infoContainer}>
         <Text style={styles.title} numberOfLines={2}>
-          {movie.title || movie.name}
+          {item.title || item.name}
         </Text>
-        {movie.release_date && (
+        {item.release_date && (
           <Text style={styles.date}>
-            {new Date(movie.release_date || movie.first_air_date).getFullYear()}
+            {new Date(item.release_date || item.first_air_date).getFullYear()}
           </Text>
         )}
       </View>
@@ -47,7 +54,6 @@ const MovieCard = ({ movie, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: cardWidth,
     borderRadius: 12,
     backgroundColor: "#1a1a1a",
     overflow: "hidden",
@@ -57,9 +63,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  gridCard: {
+    marginBottom: 20,
+  },
   imageContainer: {
     width: "100%",
-    height: cardWidth * 1.5,
+    aspectRatio: 2 / 3, // Standard poster aspect ratio
     position: "relative",
   },
   poster: {
@@ -107,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MovieCard;
+export default ItemCard;

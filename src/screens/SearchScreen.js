@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { tmdbApi } from "../services/tmdbApi";
-import MovieCard from "../components/MovieCard";
+import ItemCard from "../components/ItemCard";
 import Header from "../components/Header";
 
 const SearchScreen = ({ navigation }) => {
@@ -107,7 +107,11 @@ const SearchScreen = ({ navigation }) => {
         <FlatList
           data={results}
           renderItem={({ item }) => (
-            <MovieCard movie={item} onPress={() => handleMoviePress(item)} />
+            <ItemCard
+              item={item}
+              onPress={() => handleMoviePress(item)}
+              layout="grid"
+            />
           )}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
