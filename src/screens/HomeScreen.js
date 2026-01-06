@@ -62,10 +62,10 @@ const HomeScreen = ({ navigation }) => {
             <MovieCard movie={item} onPress={() => handleMoviePress(item)} />
           )}
           keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.swimlaneContent}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       </View>
     );
@@ -126,11 +126,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingHorizontal: 20,
   },
-  listContent: {
+  swimlaneContent: {
     paddingHorizontal: 20,
   },
-  row: {
-    justifyContent: "space-between",
+  separator: {
+    width: 12,
   },
 });
 
