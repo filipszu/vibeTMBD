@@ -1,6 +1,6 @@
-# Android Device Setup & Running with Expo
+# Android Device Setup & Running with Development Build
 
-This guide will help you connect your Android phone wirelessly and run the app using Expo.
+This guide will help you connect your Android phone wirelessly and run the app using a development build. **Note:** This app requires a development build and cannot run with Expo Go. See [Development Build Setup](./DEVELOPMENT_BUILD.md) for details.
 
 ## Prerequisites
 
@@ -101,14 +101,13 @@ List of devices attached
 
 2. **Open the app on your Android device:**
    - Press `a` in the Expo terminal to open on Android
-   - Or scan the QR code with the Expo Go app (if using Expo Go)
-   - Or the app will automatically open if you have a development build installed
+   - The app will automatically open if you have a development build installed
 
 ## Running the App
 
-### Option 1: Using Expo Development Build (Recommended)
+This app requires a development build. If you haven't built and installed the app yet, see [Development Build Setup](./DEVELOPMENT_BUILD.md) for instructions.
 
-If you have a development build installed on your device:
+Once you have a development build installed on your device:
 
 ```bash
 npm run expo
@@ -116,18 +115,6 @@ npm run expo
 ```
 
 The app will automatically connect to your device via ADB and launch.
-
-### Option 2: Using Expo Go
-
-1. Install **Expo Go** from the Google Play Store on your phone
-2. Start Expo:
-   ```bash
-   npm run expo
-   ```
-3. Scan the QR code with Expo Go app
-4. The app will load in Expo Go
-
-**Note:** Expo Go has limitations and may not support all native modules. For full functionality, use a development build.
 
 ## Troubleshooting
 
@@ -189,14 +176,15 @@ source ~/.bashrc
 3. Try restarting Expo: `npm run expo`
 4. Check that your device is on the same network as your computer
 
-### Issue: App doesn't load in Expo Go
+### Issue: App doesn't load or crashes
 
 **Solutions:**
 
-1. Make sure you're using Expo Go from the Play Store (not a development build)
+1. Make sure you have a development build installed (see [Development Build Setup](./DEVELOPMENT_BUILD.md))
 2. Check that your phone and computer are on the same network
 3. Try using USB connection instead (see alternative method below)
 4. Check Expo logs for errors
+5. Rebuild the app if you've made native configuration changes: `npx expo run:android`
 
 ## Alternative: USB Connection
 

@@ -43,17 +43,13 @@ A beautiful React Native Android application for browsing movies and TV shows us
 
 3. **Run the app on Android:**
 
-   Using Expo (recommended):
+   This app requires a development build (cannot use Expo Go). See [Development Build Setup](./docs/DEVELOPMENT_BUILD.md) for complete instructions.
+
+   Quick start:
 
    ```bash
-   npm run expo
-   # Then press 'a' to open on Android
-   ```
-
-   Or using React Native CLI:
-
-   ```bash
-   npm run android
+   npx expo prebuild
+   npx expo run:android
    ```
 
 ## Project Structure
@@ -98,7 +94,7 @@ This project uses Expo for development and deployment. We use Expo's development
 npm run expo
 ```
 
-Then press `a` to open on Android, or scan the QR code with Expo Go. See [Android Device Setup](./docs/ANDROID_DEVICE_SETUP.md) for detailed instructions on connecting your device and running the app.
+Then press `a` to open on Android. See [Android Device Setup](./docs/ANDROID_DEVICE_SETUP.md) for detailed instructions on connecting your device and running the app. **Note:** This app requires a development build and cannot run with Expo Go. See [Development Build Setup](./docs/DEVELOPMENT_BUILD.md) for details.
 
 ## API Endpoints Used
 
@@ -146,6 +142,12 @@ Comprehensive documentation is available in the [`docs/`](./docs/) folder:
   - Running the app with Expo
   - Troubleshooting connection issues
 
+- **[Development Build Setup](./docs/DEVELOPMENT_BUILD.md)** - Build and run the app with custom native code
+  - Why a development build is required (custom permissions, native modules)
+  - How to use `npx expo prebuild` and `npx expo run:android`
+  - Development workflow and troubleshooting
+  - When to rebuild vs. when to just reload
+
 ### Performance & Troubleshooting
 
 - **[Android Emulator Performance Optimization](./docs/EMULATOR_PERFORMANCE.md)** - Fix slow and hanging emulator issues
@@ -160,7 +162,7 @@ Comprehensive documentation is available in the [`docs/`](./docs/) folder:
 - [ ] Set up Android development environment (see [SETUP_ANDROID.md](./docs/SETUP_ANDROID.md))
 - [ ] Add your TMDB API key to `src/config/api.js`
 - [ ] Connect your Android device (see [ANDROID_DEVICE_SETUP.md](./docs/ANDROID_DEVICE_SETUP.md))
-- [ ] Run the app: `npm run expo` (then press `a` to open on Android)
+- [ ] Build and run the app: `npx expo prebuild && npx expo run:android` (see [DEVELOPMENT_BUILD.md](./docs/DEVELOPMENT_BUILD.md))
 
 ## License
 
