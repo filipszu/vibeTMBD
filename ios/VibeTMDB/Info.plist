@@ -28,6 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>com.vibetmdb</string>
+          <string>com.vibetmdb</string>
         </array>
       </dict>
     </array>
