@@ -46,6 +46,7 @@ A beautiful React Native Android application for browsing movies and TV shows us
    This app requires a development build (cannot use Expo Go). See [Development Build Setup](./docs/DEVELOPMENT_BUILD.md) for complete instructions.
 
    Quick start:
+
    ```bash
    npx expo prebuild
    npx expo run:android
