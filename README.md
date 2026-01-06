@@ -146,6 +146,12 @@ Comprehensive documentation is available in the [`docs/`](./docs/) folder:
   - Running the app with Expo
   - Troubleshooting connection issues
 
+- **[Development Build Setup](./docs/DEVELOPMENT_BUILD.md)** - Build and run the app with custom native code
+  - Why Expo Go doesn't work (custom permissions, native modules)
+  - How to use `npx expo prebuild` and `npx expo run:android`
+  - Development workflow and troubleshooting
+  - When to rebuild vs. when to just reload
+
 ### Performance & Troubleshooting
 
 - **[Android Emulator Performance Optimization](./docs/EMULATOR_PERFORMANCE.md)** - Fix slow and hanging emulator issues
