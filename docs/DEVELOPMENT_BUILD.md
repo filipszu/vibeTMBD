@@ -34,6 +34,7 @@ npx expo prebuild
 ```
 
 This command:
+
 - Reads your `app.json` configuration
 - Generates native Android (`android/`) and iOS (`ios/`) directories
 - Applies permissions, intent filters, and other native configurations
@@ -48,6 +49,7 @@ npx expo run:android
 ```
 
 This command:
+
 - Compiles the native Android code
 - Builds the APK
 - Installs it on your connected device/emulator
@@ -89,12 +91,14 @@ For JavaScript-only changes, just reload:
 ### Rebuild After Native Changes
 
 Rebuild is needed when you:
+
 - Change `app.json` native configuration (schemes, permissions, etc.)
 - Add/remove native dependencies
 - Modify native code (Java/Kotlin/Objective-C)
 - Change AndroidManifest.xml or Info.plist directly
 
 **Rebuild is NOT needed for:**
+
 - JavaScript/TypeScript changes
 - React component changes
 - Style changes
@@ -105,6 +109,7 @@ Rebuild is needed when you:
 ### Build Fails
 
 1. **Clean and rebuild**:
+
    ```bash
    cd android
    ./gradlew clean
@@ -119,9 +124,11 @@ Rebuild is needed when you:
 ### App Not Installing
 
 1. **Check device connection**:
+
    ```bash
    adb devices
    ```
+
    Should show your device listed
 
 2. **Uninstall old version**:
@@ -133,6 +140,7 @@ Rebuild is needed when you:
 ### Permission Errors
 
 If you see permission-related errors:
+
 1. Ensure `app.json` has the required permissions listed
 2. Run `npx expo prebuild` to regenerate AndroidManifest.xml
 3. Rebuild the app
@@ -140,20 +148,21 @@ If you see permission-related errors:
 ### Metro Bundler Issues
 
 If Metro doesn't start or connect:
+
 1. Stop Metro: `Ctrl+C`
 2. Clear Metro cache: `npx expo start --clear`
 3. Rebuild: `npx expo run:android`
 
 ## Development Build vs Expo Go
 
-| Feature | Development Build | Expo Go |
-|---------|------------------|---------|
-| Custom Permissions | ✅ Supported | ❌ Not supported |
-| Native Modules | ✅ All modules | ⚠️ Limited set |
-| Deep Linking | ✅ Full support | ⚠️ Limited |
-| Build Time | ~10-15 min first | Instant |
-| Updates | Fast reload | Instant |
-| Native Code Changes | Requires rebuild | Not possible |
+| Feature             | Development Build | Expo Go          |
+| ------------------- | ----------------- | ---------------- |
+| Custom Permissions  | ✅ Supported      | ❌ Not supported |
+| Native Modules      | ✅ All modules    | ⚠️ Limited set   |
+| Deep Linking        | ✅ Full support   | ⚠️ Limited       |
+| Build Time          | ~10-15 min first  | Instant          |
+| Updates             | Fast reload       | Instant          |
+| Native Code Changes | Requires rebuild  | Not possible     |
 
 ## Alternative: EAS Build
 
@@ -181,4 +190,3 @@ This builds the app in the cloud and provides a download link.
 - **Expo Go won't work** due to custom permissions and native requirements
 
 For questions or issues, check the [Expo documentation](https://docs.expo.dev/) or project README.
-
