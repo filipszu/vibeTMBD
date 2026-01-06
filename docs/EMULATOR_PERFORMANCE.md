@@ -183,7 +183,7 @@ Physical devices are almost always faster than emulators:
 2. Connect via USB
 3. Run: `npm run android`
 
-See [Deploy to Physical Android Device](./DEPLOY_TO_DEVICE.md) for detailed instructions.
+See [Android Device Setup & Running with Expo](./ANDROID_DEVICE_SETUP.md) for detailed instructions on connecting your device.
 
 ### Option 2: Use Genymotion (Alternative Emulator)
 

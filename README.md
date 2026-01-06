@@ -42,10 +42,18 @@ A beautiful React Native Android application for browsing movies and TV shows us
    ```
 
 3. **Run the app on Android:**
+
+   Using Expo (recommended):
+
+   ```bash
+   npm run expo
+   # Then press 'a' to open on Android
+   ```
+
+   Or using React Native CLI:
+
    ```bash
    npm run android
-   # or
-   yarn android
    ```
 
 ## Project Structure
@@ -74,15 +82,23 @@ vibeTMBD/
 
 ## Available Scripts
 
-- `npm start` - Start Metro bundler
-- `npm run android` - Run on Android device/emulator
-- `npm run expo` - Start Expo dev server
+- `npm run expo` - Start Expo dev server (recommended for development)
+- `npm start` - Start Metro bundler (for React Native CLI)
+- `npm run android` - Run on Android using React Native CLI
 - `npm test` - Run tests
 - `npm run lint` - Run ESLint
 
 ## Expo Integration
 
-This project includes Expo SDK, allowing you to use Expo modules and APIs while maintaining full control over native code. See [Expo Setup Guide](./docs/EXPO_SETUP.md) for details on using Expo modules.
+This project uses Expo for development and deployment. We use Expo's development server to run the app on Android devices wirelessly or via USB.
+
+**To run the app:**
+
+```bash
+npm run expo
+```
+
+Then press `a` to open on Android, or scan the QR code with Expo Go. See [Android Device Setup](./docs/ANDROID_DEVICE_SETUP.md) for detailed instructions on connecting your device and running the app.
 
 ## API Endpoints Used
 
@@ -124,21 +140,11 @@ Comprehensive documentation is available in the [`docs/`](./docs/) folder:
   - Configuring environment variables
   - Creating Android Virtual Devices (AVD)
 
-### Development
-
-- **[Expo Setup Guide](./docs/EXPO_SETUP.md)** - Using Expo SDK and modules in this project
-  - Expo integration overview
-  - Available Expo modules
-  - Installing additional modules
-  - Using Expo commands
-
-### Deployment
-
-- **[Deploy to Physical Android Device](./docs/DEPLOY_TO_DEVICE.md)** - Step-by-step guide for deploying to your Android phone
-  - Enabling USB debugging
-  - Connecting your device
-  - Building and installing the app
-  - Troubleshooting common issues
+- **[Android Device Setup & Running with Expo](./docs/ANDROID_DEVICE_SETUP.md)** - Connect your Android phone wirelessly and run the app
+  - Pairing device using `adb pair`
+  - Connecting wirelessly via Wi-Fi
+  - Running the app with Expo
+  - Troubleshooting connection issues
 
 ### Performance & Troubleshooting
 
@@ -153,8 +159,8 @@ Comprehensive documentation is available in the [`docs/`](./docs/) folder:
 - [ ] Install dependencies: `npm install`
 - [ ] Set up Android development environment (see [SETUP_ANDROID.md](./docs/SETUP_ANDROID.md))
 - [ ] Add your TMDB API key to `src/config/api.js`
-- [ ] Start Metro bundler: `npm start`
-- [ ] Run on Android: `npm run android`
+- [ ] Connect your Android device (see [ANDROID_DEVICE_SETUP.md](./docs/ANDROID_DEVICE_SETUP.md))
+- [ ] Run the app: `npm run expo` (then press `a` to open on Android)
 
 ## License
 
