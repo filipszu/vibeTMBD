@@ -199,10 +199,10 @@ if [ "$ISSUES" -eq 0 ]; then
     echo "  - Launch with: -gpu host -accel on flags"
     echo "  - Consider using a physical device"
     echo ""
-    echo "See EMULATOR_PERFORMANCE.md for detailed optimization guide."
+    echo "See docs/EMULATOR_PERFORMANCE.md for detailed optimization guide."
 else
     echo ""
     echo -e "${YELLOW}⚠️  Found $ISSUES issue(s) that should be fixed${NC}"
     echo ""
-    echo "See EMULATOR_PERFORMANCE.md for detailed solutions."
+    echo "See docs/EMULATOR_PERFORMANCE.md for detailed solutions."
 fi

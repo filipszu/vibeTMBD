@@ -9,6 +9,7 @@ This guide will help you fix slow and hanging Android emulator issues on Linux.
 KVM provides hardware acceleration which is essential for emulator performance on Linux.
 
 #### Check if KVM is available:
+
 ```bash
 # Check if your CPU supports virtualization
 grep -E 'vmx|svm' /proc/cpuinfo
@@ -18,6 +19,7 @@ lsmod | grep kvm
 ```
 
 #### Install and enable KVM:
+
 ```bash
 # Install KVM packages
 sudo apt update
@@ -34,12 +36,14 @@ sudo chmod 666 /dev/kvm
 **Important:** After adding yourself to groups, you need to **log out and log back in** (or restart) for changes to take effect.
 
 #### Verify KVM is working:
+
 ```bash
 # This should return "KVM acceleration can be used"
 kvm-ok
 ```
 
 If you get permission errors, run:
+
 ```bash
 sudo chmod 666 /dev/kvm
 ```
@@ -49,11 +53,13 @@ sudo chmod 666 /dev/kvm
 ARM images are **much slower** than x86/x86_64. Always use x86_64 images.
 
 #### Check your current AVD:
+
 ```bash
 $ANDROID_HOME/emulator/emulator -list-avds
 ```
 
 #### Create a new AVD with x86_64 image:
+
 1. Open Android Studio
 2. Go to **Tools** → **Device Manager**
 3. Click **Create Device**
@@ -64,6 +70,7 @@ $ANDROID_HOME/emulator/emulator -list-avds
 6. Click **Finish**
 
 #### Or via command line:
+
 ```bash
 # List available system images
 $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list | grep "system-images"
@@ -78,6 +85,7 @@ $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel5_API33 -k 
 ### 3. Optimize Emulator Settings
 
 #### In Android Studio Device Manager:
+
 1. Open **Tools** → **Device Manager**
 2. Click the **pencil icon** (Edit) next to your AVD
 3. Click **Show Advanced Settings**
@@ -91,6 +99,7 @@ $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel5_API33 -k 
    - **Multi-Core CPU:** Set to **4** (or match your CPU cores, max 4)
 
 #### Via AVD config file:
+
 Edit `~/.android/avd/YOUR_AVD_NAME.avd/config.ini`:
 
 ```ini
@@ -126,6 +135,7 @@ $ANDROID_HOME/emulator/emulator -avd YOUR_AVD_NAME \
 **Note:** Replace `YOUR_AVD_NAME` with your actual AVD name (check with `$ANDROID_HOME/emulator/emulator -list-avds`)
 
 #### Create a helper script:
+
 Create `start-emulator.sh` in your project root:
 
 ```bash
@@ -140,6 +150,7 @@ $ANDROID_HOME/emulator/emulator -avd "$AVD_NAME" \
 ```
 
 Make it executable:
+
 ```bash
 chmod +x start-emulator.sh
 ```
@@ -147,6 +158,7 @@ chmod +x start-emulator.sh
 ### 5. Disable Unnecessary Features
 
 In the emulator settings, disable features you don't need:
+
 - **Location services** (if not needed)
 - **Camera** (if not needed)
 - **Microphone** (if not needed)
@@ -155,6 +167,7 @@ In the emulator settings, disable features you don't need:
 ### 6. Use Quick Boot (After Initial Setup)
 
 Once your emulator is set up, you can use Quick Boot for faster startup:
+
 1. In AVD settings, set **Boot option** to **Quick Boot**
 2. This saves the emulator state for faster restarts
 
@@ -170,7 +183,7 @@ Physical devices are almost always faster than emulators:
 2. Connect via USB
 3. Run: `npm run android`
 
-See `DEPLOY_TO_DEVICE.md` for detailed instructions.
+See [Deploy to Physical Android Device](./DEPLOY_TO_DEVICE.md) for detailed instructions.
 
 ### Option 2: Use Genymotion (Alternative Emulator)
 
@@ -189,6 +202,7 @@ $ANDROID_HOME/emulator/emulator -avd YOUR_AVD_NAME -no-window
 ```
 
 Then use ADB to interact:
+
 ```bash
 adb shell
 ```
@@ -198,6 +212,7 @@ adb shell
 ### Issue: "KVM is required to run this AVD"
 
 **Solution:**
+
 ```bash
 # Check if KVM is available
 lsmod | grep kvm
@@ -215,6 +230,7 @@ sudo chmod 666 /dev/kvm
 ### Issue: "emulator: ERROR: x86_64 emulation currently requires hardware acceleration"
 
 **Solution:**
+
 1. Make sure KVM is installed and enabled (see step 1)
 2. Check BIOS settings - ensure virtualization is enabled
 3. Try: `sudo chmod 666 /dev/kvm`
@@ -222,6 +238,7 @@ sudo chmod 666 /dev/kvm
 ### Issue: Emulator still slow after all optimizations
 
 **Solutions:**
+
 1. **Reduce emulator resolution:** Use a smaller device profile (e.g., Pixel 3 instead of Pixel 5)
 2. **Close other applications** to free up RAM
 3. **Use a physical device** instead
@@ -231,6 +248,7 @@ sudo chmod 666 /dev/kvm
 ### Issue: Emulator hangs/freezes
 
 **Solutions:**
+
 1. **Cold boot:** Use Cold Boot instead of Quick Boot
 2. **Wipe data:** Launch with `-wipe-data` flag
 3. **Delete and recreate AVD:** Sometimes AVDs get corrupted
@@ -240,6 +258,7 @@ sudo chmod 666 /dev/kvm
 ### Issue: "Permission denied: /dev/kvm"
 
 **Solution:**
+
 ```bash
 sudo chmod 666 /dev/kvm
 sudo usermod -aG kvm $USER
@@ -278,6 +297,7 @@ time $ANDROID_HOME/emulator/emulator -avd YOUR_AVD_NAME -gpu host -accel on
 ## Summary
 
 **Most Important Steps:**
+
 1. ✅ Enable KVM (hardware acceleration)
 2. ✅ Use x86_64 system images
 3. ✅ Enable hardware graphics (GPU)
