@@ -10,16 +10,27 @@ import {
 import { tmdbApi } from "../services/tmdbApi";
 import ItemCard from "../components/ItemCard";
 import Header from "../components/Header";
+import { useAuth } from "../context/AuthContext";
 
 const HomeScreen = ({ navigation }) => {
+  const { user } = useAuth();
   const [popularMovies, setPopularMovies] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (user?.sessionId && user?.accountId) {
+      loadFavorites();
+    } else {
+      setFavorites([]);
+    }
+  }, [user]);
 
   const loadData = async () => {
     try {
@@ -38,6 +49,36 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const loadFavorites = async () => {
+    if (!user?.sessionId || !user?.accountId) {
+      setFavorites([]);
+      return;
+    }
+
+    try {
+      const [moviesData, tvData] = await Promise.all([
+        tmdbApi.getFavoriteMovies(user.accountId, user.sessionId),
+        tmdbApi.getFavoriteTVShows(user.accountId, user.sessionId),
+      ]);
+
+      // Combine movies and TV shows, adding media_type to each item
+      const combinedFavorites = [
+        ...(moviesData.results || []).map((item) => ({
+          ...item,
+          media_type: "movie",
+        })),
+        ...(tvData.results || []).map((item) => ({
+          ...item,
+          media_type: "tv",
+        })),
+      ];
+
+      setFavorites(combinedFavorites);
+    } catch (error) {
+      console.error("Error loading favorites:", error);
+    }
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     loadData();
@@ -47,6 +88,14 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate("MovieDetails", {
       movieId: movie.id,
       mediaType: "movie",
+    });
+  };
+
+  const handleItemPress = (item) => {
+    const mediaType = item.media_type || "movie";
+    navigation.navigate("MovieDetails", {
+      movieId: item.id,
+      mediaType: mediaType,
     });
   };
 
@@ -91,13 +140,49 @@ const HomeScreen = ({ navigation }) => {
       />
       <FlatList
         data={[
+          ...(favorites.length > 0 && user
+            ? [{ key: "favorites", title: "My Favorites", data: favorites }]
+            : []),
           { key: "trending", title: "Trending Today", data: trendingMovies },
           { key: "popular", title: "Popular Movies", data: popularMovies },
         ]}
-        renderItem={({ item }) => renderSection(item.title, item.data)}
+        renderItem={({ item }) => {
+          if (item.key === "favorites") {
+            return (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{item.title}</Text>
+                <FlatList
+                  data={item.data}
+                  renderItem={({ item: favoriteItem }) => (
+                    <ItemCard
+                      item={favoriteItem}
+                      onPress={() => handleItemPress(favoriteItem)}
+                      layout="swimlane"
+                    />
+                  )}
+                  keyExtractor={(item) => `${item.id}-${item.media_type}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.swimlaneContent}
+                  ItemSeparatorComponent={() => <View style={styles.separator} />}
+                />
+              </View>
+            );
+          }
+          return renderSection(item.title, item.data);
+        }}
         keyExtractor={(item) => item.key}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              loadData();
+              if (user?.sessionId && user?.accountId) {
+                loadFavorites();
+              }
+            }}
+          />
         }
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
