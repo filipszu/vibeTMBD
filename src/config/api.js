@@ -18,6 +18,12 @@ export const TMDB_CONFIG = {
       large: 'w1280',
       original: 'original',
     },
+    profile: {
+      small: 'w185',
+      medium: 'w342',
+      large: 'w632',
+      original: 'original',
+    },
   },
 };
 

@@ -15,6 +15,7 @@ import { useAuth } from "../context/AuthContext";
 const HomeScreen = ({ navigation }) => {
   const { user } = useAuth();
   const [popularMovies, setPopularMovies] = useState([]);
+  const [popularTVShows, setPopularTVShows] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,11 +36,13 @@ const HomeScreen = ({ navigation }) => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [popular, trending] = await Promise.all([
+      const [popular, popularTV, trending] = await Promise.all([
         tmdbApi.getPopularMovies(1),
+        tmdbApi.getPopularTVShows(1),
         tmdbApi.getTrendingMovies("day"),
       ]);
       setPopularMovies(popular.results || []);
+      setPopularTVShows(popularTV.results || []);
       setTrendingMovies(trending.results || []);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -99,7 +102,7 @@ const HomeScreen = ({ navigation }) => {
     });
   };
 
-  const renderSection = (title, data) => {
+  const renderSection = (title, data, mediaType = "movie") => {
     if (!data || data.length === 0) return null;
 
     return (
@@ -110,7 +113,12 @@ const HomeScreen = ({ navigation }) => {
           renderItem={({ item }) => (
             <ItemCard
               item={item}
-              onPress={() => handleMoviePress(item)}
+              onPress={() => {
+                navigation.navigate("MovieDetails", {
+                  movieId: item.id,
+                  mediaType: mediaType,
+                });
+              }}
               layout="swimlane"
             />
           )}
@@ -145,6 +153,7 @@ const HomeScreen = ({ navigation }) => {
             : []),
           { key: "trending", title: "Trending Today", data: trendingMovies },
           { key: "popular", title: "Popular Movies", data: popularMovies },
+          { key: "popularTV", title: "Popular TV Shows", data: popularTVShows, mediaType: "tv" },
         ]}
         renderItem={({ item }) => {
           if (item.key === "favorites") {
@@ -169,7 +178,7 @@ const HomeScreen = ({ navigation }) => {
               </View>
             );
           }
-          return renderSection(item.title, item.data);
+          return renderSection(item.title, item.data, item.mediaType || "movie");
         }}
         keyExtractor={(item) => item.key}
         refreshControl={

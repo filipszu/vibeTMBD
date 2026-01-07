@@ -20,6 +20,7 @@ const ItemCard = ({ item, onPress, layout = "swimlane" }) => {
     styles.card,
     { width: cardWidth },
     layout === "grid" && styles.gridCard,
+    layout === "swimlane" && { height: 280 }, // Fixed height for swimlane
   ];
 
   return (
@@ -39,7 +40,7 @@ const ItemCard = ({ item, onPress, layout = "swimlane" }) => {
         </View>
       </View>
       <View style={styles.infoContainer}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
           {item.title || item.name}
         </Text>
         {item.release_date && (
@@ -103,12 +104,16 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     padding: 12,
+    minHeight: 60, // Fixed minimum height for consistent spacing
+    justifyContent: "flex-start",
   },
   title: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 4,
+    lineHeight: 18, // Fixed line height for consistent 2-line height
+    maxHeight: 36, // Maximum height for 2 lines (2 * 18px)
   },
   date: {
     color: "#999",
