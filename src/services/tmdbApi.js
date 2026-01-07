@@ -87,6 +87,19 @@ export const tmdbApi = {
     }
   },
 
+  // Get similar movies
+  getSimilarMovies: async (movieId, page = 1) => {
+    try {
+      const response = await api.get(`/movie/${movieId}/similar`, {
+        params: { page },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching similar movies:", error);
+      throw error;
+    }
+  },
+
   // Search movies
   searchMovies: async (query, page = 1) => {
     try {
@@ -137,6 +150,19 @@ export const tmdbApi = {
       return response.data;
     } catch (error) {
       console.error("Error fetching TV show details:", error);
+      throw error;
+    }
+  },
+
+  // Get similar TV shows
+  getSimilarTVShows: async (tvId, page = 1) => {
+    try {
+      const response = await api.get(`/tv/${tvId}/similar`, {
+        params: { page },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching similar TV shows:", error);
       throw error;
     }
   },

@@ -16,11 +16,23 @@ import { useAuth } from "../context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
 
+// Helper function to format currency
+const formatCurrency = (amount) => {
+  if (!amount || amount === 0) return "N/A";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
 const ItemDetailsPage = ({ route, navigation }) => {
   const { movieId, mediaType = "movie" } = route.params;
   const { user } = useAuth();
   const [movie, setMovie] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
+  const [isShowingSimilar, setIsShowingSimilar] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [checkingFavorite, setCheckingFavorite] = useState(false);
@@ -43,7 +55,27 @@ const ItemDetailsPage = ({ route, navigation }) => {
           ? await tmdbApi.getTVShowDetails(movieId)
           : await tmdbApi.getMovieDetails(movieId);
       setMovie(data);
-      setRecommendations(data.recommendations?.results || []);
+      
+      // Check if we have recommendations
+      const recs = data.recommendations?.results || [];
+      if (recs.length > 0) {
+        setRecommendations(recs);
+        setIsShowingSimilar(false);
+      } else {
+        // Fallback to similar items
+        try {
+          const similarData =
+            mediaType === "tv"
+              ? await tmdbApi.getSimilarTVShows(movieId)
+              : await tmdbApi.getSimilarMovies(movieId);
+          setRecommendations(similarData.results || []);
+          setIsShowingSimilar(true);
+        } catch (error) {
+          console.error("Error loading similar items:", error);
+          setRecommendations([]);
+          setIsShowingSimilar(false);
+        }
+      }
     } catch (error) {
       console.error("Error loading details:", error);
     } finally {
@@ -159,6 +191,30 @@ const ItemDetailsPage = ({ route, navigation }) => {
           </View>
         </View>
 
+        {mediaType === "movie" && (movie.budget > 0 || movie.revenue > 0) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Financials</Text>
+            <View style={styles.financialsRow}>
+              {movie.budget > 0 && (
+                <View style={styles.financialItem}>
+                  <Text style={styles.financialLabel}>Budget</Text>
+                  <Text style={styles.financialValue}>
+                    {formatCurrency(movie.budget)}
+                  </Text>
+                </View>
+              )}
+              {movie.revenue > 0 && (
+                <View style={styles.financialItem}>
+                  <Text style={styles.financialLabel}>Revenue</Text>
+                  <Text style={styles.financialValue}>
+                    {formatCurrency(movie.revenue)}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overview</Text>
           <Text style={styles.overview}>{movie.overview}</Text>
@@ -172,36 +228,69 @@ const ItemDetailsPage = ({ route, navigation }) => {
               showsHorizontalScrollIndicator={false}
               style={styles.castScroll}
             >
-              {movie.credits.cast.slice(0, 10).map((actor) => (
-                <View key={actor.id} style={styles.castItem}>
-                  <Text style={styles.castName}>{actor.name}</Text>
-                  <Text style={styles.castCharacter}>{actor.character}</Text>
-                </View>
-              ))}
+              {movie.credits.cast.slice(0, 10).map((actor) => {
+                const profileUrl = getImageUrl(actor.profile_path, "profile", "medium");
+                return (
+                  <View key={actor.id} style={styles.castItem}>
+                    {profileUrl ? (
+                      <Image
+                        source={{ uri: profileUrl }}
+                        style={styles.castImage}
+                      />
+                    ) : (
+                      <View style={styles.castImagePlaceholder}>
+                        <Text style={styles.castImagePlaceholderText}>
+                          {actor.name?.charAt(0)?.toUpperCase() || "?"}
+                        </Text>
+                      </View>
+                    )}
+                    <Text style={styles.castName} numberOfLines={1}>
+                      {actor.name}
+                    </Text>
+                    <Text style={styles.castCharacter} numberOfLines={1}>
+                      {actor.character}
+                    </Text>
+                  </View>
+                );
+              })}
             </ScrollView>
           </View>
         )}
 
         {recommendations.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recommendations</Text>
+            <Text style={styles.sectionTitle}>
+              {isShowingSimilar
+                ? `Similar to ${movie.title || movie.name}`
+                : "Recommendations"}
+            </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               style={styles.recommendationsScroll}
+              contentContainerStyle={styles.recommendationsContent}
             >
-              {recommendations.map((rec) => (
-                <TouchableOpacity
+              {recommendations.map((rec, index) => (
+                <View
                   key={rec.id}
-                  onPress={() => {
-                    navigation.replace("MovieDetails", {
-                      movieId: rec.id,
-                      mediaType: mediaType,
-                    });
-                  }}
+                  style={[
+                    styles.recommendationItem,
+                    index === recommendations.length - 1 && styles.recommendationItemLast,
+                  ]}
                 >
-                  <ItemCard item={rec} onPress={() => {}} layout="swimlane" />
-                </TouchableOpacity>
+                  <ItemCard
+                    item={rec}
+                    onPress={() => {
+                      // Determine media type - use the item's media_type if available, otherwise use current mediaType
+                      const itemMediaType = rec.media_type || mediaType;
+                      navigation.navigate("MovieDetails", {
+                        movieId: rec.id,
+                        mediaType: itemMediaType === "tv" ? "tv" : "movie",
+                      });
+                    }}
+                    layout="swimlane"
+                  />
+                </View>
               ))}
             </ScrollView>
           </View>
@@ -315,23 +404,74 @@ const styles = StyleSheet.create({
   },
   castItem: {
     marginRight: 16,
-    padding: 12,
+    alignItems: "center",
+    width: 100,
+  },
+  castImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 8,
     backgroundColor: "#1a1a1a",
-    borderRadius: 8,
-    minWidth: 120,
+  },
+  castImagePlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 8,
+    backgroundColor: "#2a2a2a",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  castImagePlaceholderText: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "bold",
   },
   castName: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 4,
+    textAlign: "center",
+    width: "100%",
   },
   castCharacter: {
     color: "#999",
     fontSize: 12,
+    textAlign: "center",
+    width: "100%",
   },
   recommendationsScroll: {
     marginTop: 12,
+  },
+  recommendationsContent: {
+    paddingRight: 20,
+  },
+  recommendationItem: {
+    marginRight: 12,
+  },
+  recommendationItemLast: {
+    marginRight: 0,
+  },
+  financialsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 12,
+  },
+  financialItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  financialLabel: {
+    color: "#999",
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  financialValue: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
