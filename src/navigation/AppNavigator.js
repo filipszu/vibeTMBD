@@ -9,7 +9,7 @@ import ItemDetailsPage from "../screens/ItemDetailsPage";
 import SearchScreen from "../screens/SearchScreen";
 import AccountScreen from "../screens/AccountScreen";
 import LoginScreen from "../screens/LoginScreen";
-import CollectionView from "../screens/CollectionView";
+import FavoritesView from "../screens/FavoritesView";
 import { useAuth } from "../context/AuthContext";
 
 const Stack = createNativeStackNavigator();
@@ -81,8 +81,8 @@ const AccountStack = () => {
         }}
       />
       <Stack.Screen
-        name="CollectionView"
-        component={CollectionView}
+        name="FavoritesView"
+        component={FavoritesView}
         options={{
           headerShown: true,
           headerStyle: { backgroundColor: "#0a0a0a" },

@@ -55,14 +55,14 @@ const AccountScreen = ({ navigation }) => {
   };
 
   const handleFavoriteMoviesPress = () => {
-    navigation.navigate("CollectionView", {
+    navigation.navigate("FavoritesView", {
       collectionType: "movies",
       title: "Favorite Movies",
     });
   };
 
   const handleFavoriteTVShowsPress = () => {
-    navigation.navigate("CollectionView", {
+    navigation.navigate("FavoritesView", {
       collectionType: "tv",
       title: "Favorite TV Shows",
     });

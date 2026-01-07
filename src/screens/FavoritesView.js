@@ -12,7 +12,7 @@ import { useAuth } from "../context/AuthContext";
 import { tmdbApi } from "../services/tmdbApi";
 import ItemCard from "../components/ItemCard";
 
-const CollectionView = ({ route, navigation }) => {
+const FavoritesView = ({ route, navigation }) => {
   const { collectionType, title } = route.params; // 'movies' or 'tv'
   const { user } = useAuth();
   const [items, setItems] = useState([]);
@@ -62,7 +62,7 @@ const CollectionView = ({ route, navigation }) => {
       const totalPages = data.total_pages || 1;
       setHasMore(pageNum < totalPages);
     } catch (error) {
-      console.error("Error loading collection:", error);
+      console.error("Error loading favorites:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -189,5 +189,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CollectionView;
+export default FavoritesView;
 
