@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import HomeScreen from "../screens/HomeScreen";
-import MovieDetailsScreen from "../screens/MovieDetailsScreen";
+import ItemDetailsPage from "../screens/ItemDetailsPage";
 import SearchScreen from "../screens/SearchScreen";
 import AccountScreen from "../screens/AccountScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -25,7 +25,7 @@ const HomeStack = () => {
       <Stack.Screen name="HomeMain" component={HomeScreen} />
       <Stack.Screen
         name="MovieDetails"
-        component={MovieDetailsScreen}
+        component={ItemDetailsPage}
         options={{
           headerShown: true,
           headerStyle: { backgroundColor: "#0a0a0a" },
@@ -48,7 +48,7 @@ const SearchStack = () => {
       <Stack.Screen name="SearchMain" component={SearchScreen} />
       <Stack.Screen
         name="MovieDetails"
-        component={MovieDetailsScreen}
+        component={ItemDetailsPage}
         options={{
           headerShown: true,
           headerStyle: { backgroundColor: "#0a0a0a" },
@@ -71,7 +71,7 @@ const AccountStack = () => {
       <Stack.Screen name="AccountMain" component={AccountScreen} />
       <Stack.Screen
         name="MovieDetails"
-        component={MovieDetailsScreen}
+        component={ItemDetailsPage}
         options={{
           headerShown: true,
           headerStyle: { backgroundColor: "#0a0a0a" },

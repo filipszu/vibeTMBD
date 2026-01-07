@@ -12,18 +12,28 @@ import {
 import { tmdbApi } from "../services/tmdbApi";
 import { getImageUrl } from "../config/api";
 import ItemCard from "../components/ItemCard";
+import { useAuth } from "../context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
 
-const MovieDetailsScreen = ({ route, navigation }) => {
+const ItemDetailsPage = ({ route, navigation }) => {
   const { movieId, mediaType = "movie" } = route.params;
+  const { user } = useAuth();
   const [movie, setMovie] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [checkingFavorite, setCheckingFavorite] = useState(false);
 
   useEffect(() => {
     loadMovieDetails();
   }, [movieId, mediaType]);
+
+  useEffect(() => {
+    if (movie && user?.sessionId && user?.accountId) {
+      checkFavoriteStatus();
+    }
+  }, [movie, user]);
 
   const loadMovieDetails = async () => {
     try {
@@ -38,6 +48,55 @@ const MovieDetailsScreen = ({ route, navigation }) => {
       console.error("Error loading details:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkFavoriteStatus = async () => {
+    if (!user?.sessionId || !user?.accountId || !movie) {
+      return;
+    }
+
+    try {
+      setCheckingFavorite(true);
+      const favorites =
+        mediaType === "tv"
+          ? await tmdbApi.getFavoriteTVShows(user.accountId, user.sessionId)
+          : await tmdbApi.getFavoriteMovies(user.accountId, user.sessionId);
+
+      const favoriteIds = (favorites.results || []).map((item) => item.id);
+      setIsFavorite(favoriteIds.includes(movie.id));
+    } catch (error) {
+      console.error("Error checking favorite status:", error);
+    } finally {
+      setCheckingFavorite(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!user?.sessionId || !user?.accountId || !movie) {
+      return;
+    }
+
+    try {
+      const newFavoriteStatus = !isFavorite;
+      if (mediaType === "tv") {
+        await tmdbApi.toggleTVFavorite(
+          user.accountId,
+          user.sessionId,
+          movie.id,
+          newFavoriteStatus
+        );
+      } else {
+        await tmdbApi.toggleMovieFavorite(
+          user.accountId,
+          user.sessionId,
+          movie.id,
+          newFavoriteStatus
+        );
+      }
+      setIsFavorite(newFavoriteStatus);
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
     }
   };
 
@@ -63,7 +122,20 @@ const MovieDetailsScreen = ({ route, navigation }) => {
             <Image source={{ uri: posterUrl }} style={styles.poster} />
           )}
           <View style={styles.headerInfo}>
-            <Text style={styles.title}>{movie.title || movie.name}</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.title}>{movie.title || movie.name}</Text>
+              {user && (
+                <TouchableOpacity
+                  style={styles.favoriteButton}
+                  onPress={handleToggleFavorite}
+                  disabled={checkingFavorite}
+                >
+                  <Text style={styles.favoriteIcon}>
+                    {isFavorite ? "❤️" : "🤍"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
             <View style={styles.metaRow}>
               <Text style={styles.rating}>
                 ⭐ {movie.vote_average?.toFixed(1) || "N/A"}
@@ -171,11 +243,26 @@ const styles = StyleSheet.create({
   headerInfo: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 12,
+    flex: 1,
+    marginRight: 12,
+  },
+  favoriteButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  favoriteIcon: {
+    fontSize: 28,
   },
   metaRow: {
     flexDirection: "row",
@@ -248,4 +335,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MovieDetailsScreen;
+export default ItemDetailsPage;
+
