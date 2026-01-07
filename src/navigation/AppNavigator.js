@@ -70,6 +70,16 @@ const AccountStack = () => {
     >
       <Stack.Screen name="AccountMain" component={AccountScreen} />
       <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: "#0a0a0a" },
+          headerTintColor: "#fff",
+          headerTitle: "Login",
+        }}
+      />
+      <Stack.Screen
         name="MovieDetails"
         component={ItemDetailsPage}
         options={{
@@ -132,7 +142,7 @@ const MainTabs = () => {
 };
 
 const AppNavigator = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return null; // Or a loading screen
@@ -146,15 +156,7 @@ const AppNavigator = () => {
           contentStyle: { backgroundColor: "#0a0a0a" },
         }}
       >
-        {isAuthenticated ? (
-          <Stack.Screen name="MainTabs" component={MainTabs} />
-        ) : (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ gestureEnabled: false }}
-          />
-        )}
+        <Stack.Screen name="MainTabs" component={MainTabs} />
       </Stack.Navigator>
     </NavigationContainer>
   );

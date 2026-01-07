@@ -69,11 +69,21 @@ const AccountScreen = ({ navigation }) => {
     });
   };
 
+  const handleLoginPress = () => {
+    navigation.navigate("Login");
+  };
+
   if (!user) {
     return (
       <View style={styles.container}>
         <View style={styles.centerContainer}>
-          <Text style={styles.noUserText}>Not logged in</Text>
+          <Text style={styles.loginPromptText}>To favorite items please</Text>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={handleLoginPress}
+          >
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -245,9 +255,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  noUserText: {
-    color: "#999",
+  loginPromptText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  loginButton: {
+    backgroundColor: "#FFD700",
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    minWidth: 120,
+  },
+  loginButtonText: {
+    color: "#000",
     fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
   emptyText: {
     color: "#fff",
