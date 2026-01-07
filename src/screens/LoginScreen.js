@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,12 @@ import {
   Alert,
 } from "react-native";
 import { WebView } from "react-native-webview";
+import { useFocusEffect } from "@react-navigation/native";
 import { authService } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [requestToken, setRequestToken] = useState(null);
   const [authUrl, setAuthUrl] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,51 @@ const LoginScreen = ({ navigation }) => {
   useEffect(() => {
     initializeAuth();
   }, []);
+
+  const hasNavigatedRef = useRef(false);
+  const previousUserRef = useRef(user);
+
+  // Navigate away when user becomes authenticated (handles both WebView and deep link cases)
+  useEffect(() => {
+    // Check if user just logged in (changed from null/undefined to a user object)
+    const userJustLoggedIn = user && !previousUserRef.current;
+    
+    if (userJustLoggedIn && !hasNavigatedRef.current) {
+      // User just logged in, navigate back
+      hasNavigatedRef.current = true;
+      setProcessing(false);
+      // Use a small timeout to ensure navigation state is ready
+      const timer = setTimeout(() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.navigate("AccountMain");
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+    
+    // Update previous user ref
+    previousUserRef.current = user;
+  }, [user, navigation]);
+
+  // Reset navigation flag when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      hasNavigatedRef.current = false;
+      previousUserRef.current = user;
+      // If user is already authenticated when screen is focused, navigate away
+      if (user) {
+        hasNavigatedRef.current = true;
+        const timer = setTimeout(() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          }
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+    }, [user, navigation])
+  );
 
   const initializeAuth = async () => {
     try {
@@ -47,7 +93,8 @@ const LoginScreen = ({ navigation }) => {
 
     // Check if this is a deep link redirect (user opened in browser)
     if (url.startsWith("com.vibetmdb://auth")) {
-      // Deep link will be handled by App.js, just close the WebView
+      // Deep link will be handled by App.js, set processing state
+      // The useEffect watching user state will handle navigation
       setProcessing(true);
       return;
     }
@@ -74,7 +121,15 @@ const LoginScreen = ({ navigation }) => {
 
         const sessionData = await authService.createSession(tokenToUse);
         await login(sessionData);
-        // Navigation will be handled by AuthNavigator
+        // Navigation will be handled by the useEffect that watches for user state
+        // Small delay to ensure state updates
+        setTimeout(() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          } else {
+            navigation.navigate("AccountMain");
+          }
+        }, 100);
       } catch (error) {
         console.error("Error creating session:", error);
         Alert.alert(

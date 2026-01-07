@@ -3,50 +3,39 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  FlatList,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { tmdbApi } from "../services/tmdbApi";
-import ItemCard from "../components/ItemCard";
 
 const AccountScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const [favoriteMovies, setFavoriteMovies] = useState([]);
-  const [favoriteTVShows, setFavoriteTVShows] = useState([]);
+  const [favoriteMoviesCount, setFavoriteMoviesCount] = useState(0);
+  const [favoriteTVShowsCount, setFavoriteTVShowsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("movies"); // 'movies' or 'tv'
 
   useEffect(() => {
     if (user) {
-      loadFavorites();
+      loadFavoriteCounts();
     }
-  }, [user, activeTab]);
+  }, [user]);
 
-  const loadFavorites = async () => {
+  const loadFavoriteCounts = async () => {
     if (!user?.sessionId || !user?.accountId) {
       return;
     }
 
     try {
       setLoading(true);
-      if (activeTab === "movies") {
-        const data = await tmdbApi.getFavoriteMovies(
-          user.accountId,
-          user.sessionId
-        );
-        setFavoriteMovies(data.results || []);
-      } else {
-        const data = await tmdbApi.getFavoriteTVShows(
-          user.accountId,
-          user.sessionId
-        );
-        setFavoriteTVShows(data.results || []);
-      }
+      const [moviesData, tvData] = await Promise.all([
+        tmdbApi.getFavoriteMovies(user.accountId, user.sessionId),
+        tmdbApi.getFavoriteTVShows(user.accountId, user.sessionId),
+      ]);
+      setFavoriteMoviesCount(moviesData.total_results || 0);
+      setFavoriteTVShowsCount(tvData.total_results || 0);
     } catch (error) {
-      console.error("Error loading favorites:", error);
+      console.error("Error loading favorite counts:", error);
     } finally {
       setLoading(false);
     }
@@ -61,11 +50,21 @@ const AccountScreen = ({ navigation }) => {
     }
   };
 
-  const handleItemPress = (item) => {
-    const mediaType = activeTab === "movies" ? "movie" : "tv";
-    navigation.navigate("MovieDetails", {
-      movieId: item.id,
-      mediaType: mediaType,
+  const handleLoginPress = () => {
+    navigation.navigate("Login");
+  };
+
+  const handleFavoriteMoviesPress = () => {
+    navigation.navigate("FavoritesView", {
+      collectionType: "movies",
+      title: "Favorite Movies",
+    });
+  };
+
+  const handleFavoriteTVShowsPress = () => {
+    navigation.navigate("FavoritesView", {
+      collectionType: "tv",
+      title: "Favorite TV Shows",
     });
   };
 
@@ -73,13 +72,17 @@ const AccountScreen = ({ navigation }) => {
     return (
       <View style={styles.container}>
         <View style={styles.centerContainer}>
-          <Text style={styles.noUserText}>Not logged in</Text>
+          <Text style={styles.loginPromptText}>To favorite items please</Text>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={handleLoginPress}
+          >
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
   }
-
-  const favorites = activeTab === "movies" ? favoriteMovies : favoriteTVShows;
 
   return (
     <View style={styles.container}>
@@ -101,62 +104,36 @@ const AccountScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "movies" && styles.tabActive]}
-          onPress={() => setActiveTab("movies")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "movies" && styles.tabTextActive,
-            ]}
-          >
-            Favorite Movies
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "tv" && styles.tabActive]}
-          onPress={() => setActiveTab("tv")}
-        >
-          <Text
-            style={[styles.tabText, activeTab === "tv" && styles.tabTextActive]}
-          >
-            Favorite TV Shows
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.favoritesSection}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#FFD700" />
+          </View>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.favoriteCountItem}
+              onPress={handleFavoriteMoviesPress}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.favoriteCountLabel}>Favorite Movies</Text>
+              <Text style={styles.favoriteCountValue}>
+                {favoriteMoviesCount}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.favoriteCountItem}
+              onPress={handleFavoriteTVShowsPress}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.favoriteCountLabel}>Favorite TV Shows</Text>
+              <Text style={styles.favoriteCountValue}>
+                {favoriteTVShowsCount}
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
-
-      {loading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#FFD700" />
-        </View>
-      ) : favorites.length > 0 ? (
-        <FlatList
-          data={favorites}
-          renderItem={({ item }) => (
-            <ItemCard
-              item={item}
-              onPress={() => handleItemPress(item)}
-              layout="grid"
-            />
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>
-            No favorite {activeTab === "movies" ? "movies" : "TV shows"} yet
-          </Text>
-          <Text style={styles.emptySubtext}>
-            Add items to your favorites to see them here
-          </Text>
-        </View>
-      )}
     </View>
   );
 };
@@ -216,28 +193,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  tabs: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
-  },
-  tab: {
+  favoritesSection: {
     flex: 1,
-    paddingVertical: 16,
+    padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
   },
-  tabActive: {
-    borderBottomColor: "#FFD700",
+  favoriteCountItem: {
+    backgroundColor: "#1a1a1a",
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 16,
   },
-  tabText: {
-    color: "#666",
-    fontSize: 16,
-    fontWeight: "600",
+  favoriteCountLabel: {
+    color: "#999",
+    fontSize: 14,
+    marginBottom: 8,
   },
-  tabTextActive: {
+  favoriteCountValue: {
     color: "#FFD700",
+    fontSize: 32,
+    fontWeight: "bold",
   },
   centerContainer: {
     flex: 1,
@@ -245,27 +224,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  noUserText: {
-    color: "#999",
-    fontSize: 16,
-  },
-  emptyText: {
+  loginPromptText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 8,
+    marginBottom: 24,
     textAlign: "center",
   },
-  emptySubtext: {
-    color: "#666",
-    fontSize: 14,
+  loginButton: {
+    backgroundColor: "#FFD700",
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    minWidth: 120,
+  },
+  loginButtonText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "600",
     textAlign: "center",
-  },
-  listContent: {
-    padding: 20,
-  },
-  row: {
-    justifyContent: "space-between",
   },
 });
 

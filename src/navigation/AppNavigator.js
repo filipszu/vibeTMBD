@@ -9,6 +9,7 @@ import ItemDetailsPage from "../screens/ItemDetailsPage";
 import SearchScreen from "../screens/SearchScreen";
 import AccountScreen from "../screens/AccountScreen";
 import LoginScreen from "../screens/LoginScreen";
+import FavoritesView from "../screens/FavoritesView";
 import { useAuth } from "../context/AuthContext";
 
 const Stack = createNativeStackNavigator();
@@ -69,6 +70,25 @@ const AccountStack = () => {
       }}
     >
       <Stack.Screen name="AccountMain" component={AccountScreen} />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: "#0a0a0a" },
+          headerTintColor: "#fff",
+          headerTitle: "Login",
+        }}
+      />
+      <Stack.Screen
+        name="FavoritesView"
+        component={FavoritesView}
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: "#0a0a0a" },
+          headerTintColor: "#fff",
+        }}
+      />
       <Stack.Screen
         name="MovieDetails"
         component={ItemDetailsPage}
@@ -132,7 +152,7 @@ const MainTabs = () => {
 };
 
 const AppNavigator = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return null; // Or a loading screen
@@ -146,15 +166,7 @@ const AppNavigator = () => {
           contentStyle: { backgroundColor: "#0a0a0a" },
         }}
       >
-        {isAuthenticated ? (
-          <Stack.Screen name="MainTabs" component={MainTabs} />
-        ) : (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ gestureEnabled: false }}
-          />
-        )}
+        <Stack.Screen name="MainTabs" component={MainTabs} />
       </Stack.Navigator>
     </NavigationContainer>
   );
