@@ -90,12 +90,72 @@ const LoginScreen = ({ navigation }) => {
 
   const handleWebViewNavigation = async (navState) => {
     const { url } = navState;
+    
+    if (!url) return;
+    
+    console.log("WebView navigation to:", url);
 
-    // Check if this is a deep link redirect (user opened in browser)
+    // Check if this is a deep link redirect
     if (url.startsWith("com.vibetmdb://auth")) {
-      // Deep link will be handled by App.js, set processing state
-      // The useEffect watching user state will handle navigation
+      console.log("Deep link detected in WebView:", url);
       setProcessing(true);
+      
+      // Extract query parameters manually
+      const queryString = url.split("?")[1];
+      if (queryString) {
+        const params = {};
+        queryString.split("&").forEach((param) => {
+          const [key, value] = param.split("=");
+          params[key] = decodeURIComponent(value || "");
+        });
+
+        const requestToken = params.request_token;
+        const approved = params.approved;
+
+        if (approved === "true" && requestToken) {
+          try {
+            console.log("Processing auth callback with token:", requestToken);
+            const sessionData = await authService.createSession(requestToken);
+            await login(sessionData);
+            // Navigation will be handled by useEffect watching user state
+          } catch (error) {
+            console.error("Error creating session:", error);
+            Alert.alert(
+              "Login Failed",
+              "Failed to complete login. Please try again.",
+              [{ text: "OK", onPress: initializeAuth }]
+            );
+            setProcessing(false);
+          }
+        } else if (approved === "false") {
+          Alert.alert("Access Denied", "You need to approve access to continue.", [
+            { text: "OK", onPress: initializeAuth },
+          ]);
+          setProcessing(false);
+        }
+      }
+      return;
+    }
+
+    // Check if user is on their profile page after authentication
+    // This might happen if they're already logged in to TMDB
+    if (url.includes("themoviedb.org/u/") || url.includes("themoviedb.org/user/")) {
+      console.log("User on profile page, checking if token was approved...");
+      // If we're on profile page and have a request token, try to create session
+      // TMDB might have auto-approved if user was already logged in
+      if (requestToken) {
+        setProcessing(true);
+        try {
+          // Try to create session - if token was approved, this will work
+          const sessionData = await authService.createSession(requestToken);
+          await login(sessionData);
+          // Navigation will be handled by useEffect
+        } catch (error) {
+          console.error("Token not approved yet or error:", error);
+          // Token might not be approved yet, wait for redirect
+          setProcessing(false);
+        }
+      }
       return;
     }
 
@@ -192,6 +252,76 @@ const LoginScreen = ({ navigation }) => {
           <WebView
             source={{ uri: authUrl }}
             onNavigationStateChange={handleWebViewNavigation}
+            onShouldStartLoadWithRequest={(request) => {
+              const { url } = request;
+              
+              console.log("WebView shouldStartLoadWithRequest:", url);
+              
+              // Intercept deep link redirects
+              if (url && url.startsWith("com.vibetmdb://auth")) {
+                console.log("Intercepting deep link:", url);
+                handleWebViewNavigation({ url });
+                return false; // Prevent WebView from loading the deep link
+              }
+              
+              // Allow normal navigation
+              return true;
+            }}
+            setSupportMultipleWindows={false}
+            onMessage={(event) => {
+              // Handle messages from injected JavaScript
+              try {
+                const data = JSON.parse(event.nativeEvent.data);
+                if (data.type === "redirect" && data.url) {
+                  console.log("JavaScript detected redirect:", data.url);
+                  handleWebViewNavigation({ url: data.url });
+                }
+              } catch (error) {
+                console.error("Error parsing WebView message:", error);
+              }
+            }}
+            injectedJavaScript={`
+              (function() {
+                // Monitor location changes
+                let lastUrl = window.location.href;
+                
+                function checkUrl(url) {
+                  if (url && (url.startsWith('com.vibetmdb://auth') || url.includes('approved=true') || url.includes('denied=true'))) {
+                    console.log('Detected redirect:', url);
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'redirect',
+                      url: url
+                    }));
+                  }
+                }
+                
+                // Check current URL
+                checkUrl(lastUrl);
+                
+                // Monitor for URL changes
+                setInterval(function() {
+                  if (window.location.href !== lastUrl) {
+                    lastUrl = window.location.href;
+                    checkUrl(lastUrl);
+                  }
+                }, 100);
+                
+                // Override location changes
+                const originalAssign = window.location.assign;
+                const originalReplace = window.location.replace;
+                
+                window.location.assign = function(url) {
+                  checkUrl(url);
+                  return originalAssign.apply(window.location, arguments);
+                };
+                
+                window.location.replace = function(url) {
+                  checkUrl(url);
+                  return originalReplace.apply(window.location, arguments);
+                };
+              })();
+              true;
+            `}
             style={styles.webView}
             startInLoadingState={true}
             renderLoading={() => (

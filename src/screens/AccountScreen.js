@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import { tmdbApi } from "../services/tmdbApi";
 
@@ -15,13 +16,7 @@ const AccountScreen = ({ navigation }) => {
   const [favoriteTVShowsCount, setFavoriteTVShowsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      loadFavoriteCounts();
-    }
-  }, [user]);
-
-  const loadFavoriteCounts = async () => {
+  const loadFavoriteCounts = React.useCallback(async () => {
     if (!user?.sessionId || !user?.accountId) {
       return;
     }
@@ -39,7 +34,22 @@ const AccountScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.sessionId, user?.accountId]);
+
+  useEffect(() => {
+    if (user) {
+      loadFavoriteCounts();
+    }
+  }, [user, loadFavoriteCounts]);
+
+  // Refresh favorite counts when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (user) {
+        loadFavoriteCounts();
+      }
+    }, [user, loadFavoriteCounts])
+  );
 
   const handleLogout = async () => {
     try {
