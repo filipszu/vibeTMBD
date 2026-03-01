@@ -1,0 +1,57 @@
+require('dotenv').config();
+
+module.exports = {
+  expo: {
+    name: "Vibe TMDB",
+    slug: "vibe-tmdb",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/icon.png",
+    userInterfaceStyle: "dark",
+    splash: {
+      image: "./assets/splash.png",
+      resizeMode: "contain",
+      backgroundColor: "#0a0a0a"
+    },
+    assetBundlePatterns: ["**/*"],
+    scheme: "com.vibetmdb",
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: "com.vibetmdb"
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/adaptive-icon.png",
+        backgroundColor: "#0a0a0a"
+      },
+      package: "com.vibetmdb",
+      permissions: ["android.permission.DETECT_SCREEN_CAPTURE"],
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: [
+            {
+              scheme: "com.vibetmdb"
+            }
+          ],
+          category: ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    web: {
+      favicon: "./assets/favicon.png"
+    },
+    extra: {
+      eas: {
+        projectId: "your-project-id"
+      },
+      // Expose environment variables to the app
+      tmdbApiKey: process.env.TMDB_API_KEY,
+    },
+    plugins: ["expo-secure-store"]
+  },
+  name: "vibeTMBD",
+  displayName: "Vibe TMDB"
+};
+

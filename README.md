@@ -29,17 +29,19 @@ A beautiful React Native Android application for browsing movies and TV shows us
 
 2. **Set up your TMDB API key:**
 
-   Open `src/config/api.js` and replace `YOUR_API_KEY_HERE` with your actual TMDB API key:
+   Create a `.env` file in the root directory (copy from `.env.example`):
 
-   ```javascript
-   API_KEY: 'your_actual_api_key_here',
+   ```bash
+   cp .env.example .env
    ```
 
-   Or create a `.env` file in the root directory:
+   Then edit `.env` and add your TMDB API key:
 
    ```
    TMDB_API_KEY=your_actual_api_key_here
    ```
+
+   **Important:** Never commit the `.env` file to git. It's already in `.gitignore`.
 
 3. **Run the app on Android:**
 
