@@ -190,3 +190,4 @@ This builds the app in the cloud and provides a download link.
 - **Expo Go won't work** due to custom permissions and native requirements
 
 For questions or issues, check the [Expo documentation](https://docs.expo.dev/) or project README.
+

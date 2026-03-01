@@ -41,6 +41,8 @@ export const authService = {
    * User needs to visit this URL to approve the request token
    */
   getAuthUrl: (requestToken) => {
+    // TMDB requires a full URL for redirect_to, but we can use our custom scheme
+    // The redirect will be: com.vibetmdb://auth?request_token=XXX&approved=true
     return `https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${encodeURIComponent("com.vibetmdb://auth")}`;
   },
 
