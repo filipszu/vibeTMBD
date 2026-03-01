@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   Dimensions,
   TouchableOpacity,
+  Modal,
 } from "react-native";
+import YoutubePlayer from "react-native-youtube-iframe";
 import { tmdbApi } from "../services/tmdbApi";
 import { getImageUrl } from "../config/api";
 import ItemCard from "../components/ItemCard";
@@ -36,6 +38,7 @@ const ItemDetailsPage = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [checkingFavorite, setCheckingFavorite] = useState(false);
+  const [trailerModalVisible, setTrailerModalVisible] = useState(false);
 
   useEffect(() => {
     loadMovieDetails();
@@ -143,8 +146,15 @@ const ItemDetailsPage = ({ route, navigation }) => {
   const backdropUrl = getImageUrl(movie.backdrop_path, "backdrop", "large");
   const posterUrl = getImageUrl(movie.poster_path, "poster", "large");
 
+  const videos = movie.videos?.results || [];
+  const trailer =
+    videos.find((v) => v.site === "YouTube" && v.type === "Trailer") ||
+    videos.find((v) => v.site === "YouTube");
+  const trailerKey = trailer?.key ?? null;
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {backdropUrl && (
         <Image source={{ uri: backdropUrl }} style={styles.backdrop} />
       )}
@@ -190,6 +200,15 @@ const ItemDetailsPage = ({ route, navigation }) => {
             </View>
           </View>
         </View>
+
+        {trailerKey && (
+          <TouchableOpacity
+            style={styles.trailerButton}
+            onPress={() => setTrailerModalVisible(true)}
+          >
+            <Text style={styles.trailerButtonText}>Watch Trailer</Text>
+          </TouchableOpacity>
+        )}
 
         {mediaType === "movie" && (movie.budget > 0 || movie.revenue > 0) && (
           <View style={styles.section}>
@@ -297,6 +316,38 @@ const ItemDetailsPage = ({ route, navigation }) => {
         )}
       </View>
     </ScrollView>
+
+      <Modal
+        visible={trailerModalVisible}
+        onRequestClose={() => setTrailerModalVisible(false)}
+        transparent
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setTrailerModalVisible(false)}
+          />
+          <View style={styles.modalContent}>
+            <View style={styles.trailerPlayerContainer}>
+              <YoutubePlayer
+                height={((width - 32) * 9) / 16}
+                play={true}
+                videoId={trailerKey}
+              />
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setTrailerModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Text style={styles.modalCloseText}>×</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 };
 
@@ -472,6 +523,54 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  trailerButton: {
+    backgroundColor: "#FFD700",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginBottom: 24,
+  },
+  trailerButtonText: {
+    color: "#0a0a0a",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.8)",
+  },
+  modalContent: {
+    width: width - 32,
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  trailerPlayerContainer: {
+    position: "relative",
+  },
+  modalCloseButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalCloseText: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "300",
+    lineHeight: 26,
   },
 });
 
