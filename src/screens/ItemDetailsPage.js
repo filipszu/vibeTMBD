@@ -12,6 +12,8 @@ import {
 import { tmdbApi } from "../services/tmdbApi";
 import { getImageUrl } from "../config/api";
 import ItemCard from "../components/ItemCard";
+import TrailerButton from "../components/TrailerButton";
+import TrailerModal from "../components/TrailerModal";
 import { useAuth } from "../context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
@@ -36,6 +38,7 @@ const ItemDetailsPage = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [checkingFavorite, setCheckingFavorite] = useState(false);
+  const [trailerModalVisible, setTrailerModalVisible] = useState(false);
 
   useEffect(() => {
     loadMovieDetails();
@@ -143,8 +146,15 @@ const ItemDetailsPage = ({ route, navigation }) => {
   const backdropUrl = getImageUrl(movie.backdrop_path, "backdrop", "large");
   const posterUrl = getImageUrl(movie.poster_path, "poster", "large");
 
+  const videos = movie.videos?.results || [];
+  const trailer =
+    videos.find((v) => v.site === "YouTube" && v.type === "Trailer") ||
+    videos.find((v) => v.site === "YouTube");
+  const trailerKey = trailer?.key ?? null;
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {backdropUrl && (
         <Image source={{ uri: backdropUrl }} style={styles.backdrop} />
       )}
@@ -190,6 +200,10 @@ const ItemDetailsPage = ({ route, navigation }) => {
             </View>
           </View>
         </View>
+
+        {trailerKey && (
+          <TrailerButton onPress={() => setTrailerModalVisible(true)} />
+        )}
 
         {mediaType === "movie" && (movie.budget > 0 || movie.revenue > 0) && (
           <View style={styles.section}>
@@ -297,6 +311,13 @@ const ItemDetailsPage = ({ route, navigation }) => {
         )}
       </View>
     </ScrollView>
+
+      <TrailerModal
+        visible={trailerModalVisible}
+        videoId={trailerKey}
+        onClose={() => setTrailerModalVisible(false)}
+      />
+    </>
   );
 };
 
