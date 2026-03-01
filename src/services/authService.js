@@ -83,7 +83,10 @@ export const authService = {
         account: accountResponse.data,
       };
     } catch (error) {
-      console.error("Error creating session:", error);
+      // Don't log 401 - expected when the same auth callback is handled twice (WebView + Linking)
+      if (error.response?.status !== 401) {
+        console.error("Error creating session:", error);
+      }
       throw error;
     }
   },

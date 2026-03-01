@@ -33,9 +33,15 @@ const AppContent = () => {
 
           if (approved === "true" && requestToken) {
             console.log("Processing auth callback with token:", requestToken);
-            // Complete the authentication
-            const sessionData = await authService.createSession(requestToken);
-            await login(sessionData);
+            try {
+              const sessionData = await authService.createSession(requestToken);
+              await login(sessionData);
+            } catch (error) {
+              const status = error.response?.status;
+              // 401 = token already used (WebView flow won first) or race; don't log - login still succeeds
+              if (status === 401) return;
+              console.error("Error handling deep link:", error);
+            }
           } else if (approved === "false") {
             console.log("User denied access");
           }
