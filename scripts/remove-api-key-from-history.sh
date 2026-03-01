@@ -21,21 +21,52 @@ fi
 echo ""
 echo "Removing API key from git history..."
 
-# Check if git-filter-repo is available
+# Check if git-filter-repo is available (multiple ways)
+GIT_FILTER_REPO_CMD=""
 if command -v git-filter-repo &> /dev/null; then
-    echo "Using git-filter-repo..."
-    git filter-repo --replace-text <(echo "${API_KEY}==>${REPLACEMENT}")
-elif command -v java &> /dev/null; then
-    echo "git-filter-repo not found. Please install it for best results:"
+    GIT_FILTER_REPO_CMD="git-filter-repo"
+elif python3 -m git_filter_repo --version &> /dev/null; then
+    GIT_FILTER_REPO_CMD="python3 -m git_filter_repo"
+elif [ -f ~/.local/bin/git-filter-repo ]; then
+    GIT_FILTER_REPO_CMD="$HOME/.local/bin/git-filter-repo"
+fi
+
+if [ -n "$GIT_FILTER_REPO_CMD" ]; then
+    echo "Using git-filter-repo (recommended)..."
+    # Create a temporary file with the replacement text
+    REPLACE_FILE=$(mktemp)
+    echo "${API_KEY}==>${REPLACEMENT}" > "$REPLACE_FILE"
+    $GIT_FILTER_REPO_CMD --replace-text "$REPLACE_FILE"
+    rm -f "$REPLACE_FILE"
+else
+    echo "git-filter-repo not found."
+    echo ""
+    echo "Option 1: Install git-filter-repo (recommended)"
     echo "  pip install git-filter-repo"
     echo "  or"
     echo "  brew install git-filter-repo"
     echo ""
-    echo "Alternatively, see docs/SECURITY.md for manual instructions."
-    exit 1
-else
-    echo "Please install git-filter-repo or see docs/SECURITY.md for alternatives."
-    exit 1
+    echo "Option 2: Use built-in git filter-branch (slower, but works)"
+    read -p "Do you want to use git filter-branch instead? (yes/no): " use_filter_branch
+    
+    if [ "$use_filter_branch" != "yes" ]; then
+        echo "Aborted. Please install git-filter-repo or see docs/SECURITY.md for alternatives."
+        exit 1
+    fi
+    
+    echo ""
+    echo "Using git filter-branch (this may take a while)..."
+    echo "⚠️  This is a slower method but uses built-in git commands."
+    
+    # Use git filter-branch to replace the API key in all files
+    git filter-branch --force --tree-filter \
+        "find . -type f -not -path './.git/*' -not -path './node_modules/*' -not -path './android/*' -not -path './ios/*' -exec sed -i 's|${API_KEY}|${REPLACEMENT}|g' {} + 2>/dev/null || true" \
+        --prune-empty --tag-name-filter cat -- --all
+    
+    # Clean up backup refs
+    git for-each-ref --format="delete %(refname)" refs/original 2>/dev/null | git update-ref --stdin 2>/dev/null || true
+    git reflog expire --expire=now --all
+    git gc --prune=now --aggressive
 fi
 
 echo ""
