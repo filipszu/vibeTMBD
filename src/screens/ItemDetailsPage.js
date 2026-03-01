@@ -8,12 +8,12 @@ import {
   ActivityIndicator,
   Dimensions,
   TouchableOpacity,
-  Modal,
 } from "react-native";
-import YoutubePlayer from "react-native-youtube-iframe";
 import { tmdbApi } from "../services/tmdbApi";
 import { getImageUrl } from "../config/api";
 import ItemCard from "../components/ItemCard";
+import TrailerButton from "../components/TrailerButton";
+import TrailerModal from "../components/TrailerModal";
 import { useAuth } from "../context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
@@ -202,12 +202,7 @@ const ItemDetailsPage = ({ route, navigation }) => {
         </View>
 
         {trailerKey && (
-          <TouchableOpacity
-            style={styles.trailerButton}
-            onPress={() => setTrailerModalVisible(true)}
-          >
-            <Text style={styles.trailerButtonText}>Watch Trailer</Text>
-          </TouchableOpacity>
+          <TrailerButton onPress={() => setTrailerModalVisible(true)} />
         )}
 
         {mediaType === "movie" && (movie.budget > 0 || movie.revenue > 0) && (
@@ -317,36 +312,11 @@ const ItemDetailsPage = ({ route, navigation }) => {
       </View>
     </ScrollView>
 
-      <Modal
+      <TrailerModal
         visible={trailerModalVisible}
-        onRequestClose={() => setTrailerModalVisible(false)}
-        transparent
-        animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackdrop}
-            activeOpacity={1}
-            onPress={() => setTrailerModalVisible(false)}
-          />
-          <View style={styles.modalContent}>
-            <View style={styles.trailerPlayerContainer}>
-              <YoutubePlayer
-                height={((width - 32) * 9) / 16}
-                play={true}
-                videoId={trailerKey}
-              />
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={() => setTrailerModalVisible(false)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Text style={styles.modalCloseText}>×</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        videoId={trailerKey}
+        onClose={() => setTrailerModalVisible(false)}
+      />
     </>
   );
 };
@@ -523,54 +493,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  trailerButton: {
-    backgroundColor: "#FFD700",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-    marginBottom: 24,
-  },
-  trailerButtonText: {
-    color: "#0a0a0a",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.8)",
-  },
-  modalContent: {
-    width: width - 32,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  trailerPlayerContainer: {
-    position: "relative",
-  },
-  modalCloseButton: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalCloseText: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "300",
-    lineHeight: 26,
   },
 });
 
